@@ -2,29 +2,25 @@ Title: Open Data and Search Relevance
 Date: 2015-10-27
 Tags: software engineering, information retrieval, search, open data
 
-At Socrata, we are building the next generation of technology to democratize
-government data. Our platform serves government agencies of all shapes and
-sizes, enabling them to be more transparent, more accountable, and more
+At Socrata, we have built a platform that enables government agencies of all shapes and
+sizes to be more transparent, more accountable, and more
 data-driven than ever before. One of the interesting byproducts of the
 continued adoption of our platform is a constantly evolving network of open data
 publishers. When you have all of the world's open data within the same platform,
 interesting opportunities for cross-dataset insights and connectivity become
 possible.
 
-The Analytics and Machine Learning team at Socrata has been busy building out
-some of the software that will allow us to begin to surface this network to our
-users. Our first product offering along these lines is the search engine
-powering the
+My team at has been busy building out some of the software that will allow us to begin to surface this network to our users. Our first product offering along these lines is the search engine powering the
 [Open Data Network](http://www.opendatanetwork.com). As it happens, it is also
-the same search technology that backs our version 2 catalog search interfact,
+the same system that backs our version 2 catalog search interface,
 which our customers interact with regularly when they visit their Socrata site's
 browse endpoint (eg.
 [data.seattle.gov/browse](http://data.seattle.gov/browse)) to update, analyze,
 and visualize their data.
 
-We have been making significant investments to improve this core piece of
+We have spent some time recently trying to improve this core piece of
 technology both in terms of performance as well as accuracy and relevance. In this
-blog post, I will discuss how at Socrata we use crowdsourcing to collect
+blog post, I will discuss how we use crowdsourcing to collect
 relevance judgments to measure the quality of the search results in our catalog
 search system. The high-level steps are as follows:
 
@@ -34,8 +30,7 @@ search system. The high-level steps are as follows:
 3. assign a relevance judgment to each (query, result) pair
 4. compute relevance metrics
 
-Now, this fact may come as a surprise, but building an amazing search experience
-isn't easy. Google has set the standard; as users, we expect our search results
+Building an amazing search experience isn't easy. Google has set the standard; as users, we expect our search results
 instantaneously, and we expect them to be highly relevant. How does Google do it
 so well? Well, there is a lot of secret sauce in Google's ranking algorithm, to
 be sure. There has been
@@ -45,7 +40,7 @@ result ranking model. It has been standard practice in the industry for some
 time to have a machine learning ranking model -- often an
 [artificial neural network](https://en.wikipedia.org/wiki/Artificial_neural_network)
 -- that incorporates a variety of signals. But rather than focus on the
-internals of an open dataset search engine, I want to talk about how you measure
+internals of an open dataset search engine, I want to talk about how to measure
 relevance.
 
 I have long been a fan of the following quote: "you cannot improve what you
@@ -90,7 +85,10 @@ $$ DCG_p = rel_1 + \sum_{i=2}^n {rel_i \over D(i)} $$ where $$ D(i) = log_2(i + 
 The idea here is that we have a discount function in the denominator that is a
 monotonically increasing function of position. Thus, the denominator increases
 as we go further down the results list, meaning that each result contributes
-less to the overall sum of scores.
+less to the overall sum of scores. (Strictly speaking, we use the variant second
+variant described on the
+[Wikipedia page for NDCG](https://en.wikipedia.org/wiki/Discounted_cumulative_gain)
+.)
 
 Finally, the score is "normalized" (the "N" in "NDCG"). DCG is a measure that we
 compute for each query, but not all queries are created equal. For some queries,
@@ -122,7 +120,6 @@ numeric scale as 4, 0, 2, 1, 1). A corresponding ideal ordering would be 4, 2,
     print ndcg([4, 0, 2, 1, 1])
     0.939442145196
 
-
 In order to attach a metric to our search engine's performance, we need
 relevance judgments for each query-result pair. How do we collect these
 measurements? Well, the most obvious way is to hire an army of data annotators
@@ -131,18 +128,18 @@ this is one of the tasks that workers in
 [Microsoft's Human Relevance System](http://searchengineland.com/bing-search-quality-rating-guidelines-130592)
 and
 [Google's Quality Rater program](http://marketingland.com/an-inside-look-at-what-googles-search-quality-raters-do-3969)
-are asked to do.
+are asked to do. 
 
 In the case of Microsoft and Google, the people hired to make these relevance
-judgments are trained. In contrast, there are a few companies that offer
+judgments are trained. Certainly, part of the motivation for this is that Google and Microsoft's instructions are much more complex, so as to take a lot more into account in their task. Thus, the need for a skilled workforce. In contrast, there are a few companies that offer
 crowdsourcing services like
 [Amazon Mechanical Turk](https://www.mturk.com/mturk/welcome) and
 [CrowdFlower](http://www.crowdflower.com/) consisting of untrained workers,
 which is typically much more cost effective than training and managing your own
-team of annotators. The level of training required is very much task-dependent.
+team of annotators. One key observation is that the level of training required is very much task-dependent.
 For Socrata, the task of assigning relevance judgments as we have framed it,
 while somewhat subjective and occasionally nuanced, is relatively
-straightforward, and thus, a workforce of untrained workers is sufficient. We
+straightforward, and thus, a workforce of untrained workers is sufficient (for now). We
 track the quality of the annotations that we collect by comparing crowdsourced
 judgments on a sample of data to corresponding judgments assigned by in-house
 experts.
