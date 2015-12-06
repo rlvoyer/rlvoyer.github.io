@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
+import os
 
+HOME = os.environ["HOME"]
 AUTHOR = u'Robert Voyer'
 SITENAME = u'[ ) Between Two Ranges ( ]'
 SITEURL = ''
@@ -44,12 +46,13 @@ DEFAULT_PAGINATION = False
 #RELATIVE_URLS = True
 
 # Theme
-THEME = '/Users/robertvoyer/Code/pelican-themes/aboutwilson'
+THEME = '{}/Code/pelican-themes/aboutwilson'.format(HOME)
 
 MD_EXTENSIONS = ['codehilite(css_class=highlight code)', 'extra']
 
-PLUGIN_PATHS = ['/Users/robertvoyer/Code/pelican-plugins']
+PLUGIN_PATHS = ['{}/Code/pelican-plugins'.format(HOME)]
 
 PLUGINS = ['render_math']
 
-DESCRIPTION = 'A blog about things'
+DESCRIPTION = 'A view on a data science and software engineering from a ' \
+              'technologist in Seattle'
