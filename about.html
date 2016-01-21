@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>About — [ ) Between Two Ranges ( ] </title>
+  <meta name="description" content="">
+  <meta name="author" content="Robert Voyer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+      <script src="http://rlvoyer.github.io/theme/html5.js"></script>
+      <![endif]-->  
+  <!--<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">-->
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="http://rlvoyer.github.io/theme/css/simple.css" rel="stylesheet">
+  <link href="http://rlvoyer.github.io/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <h1><a href="http://rlvoyer.github.io/">[ ) Between Two Ranges ( ]</a>
+      <br>  </div>
+  <div class="nav-menu">
+    <span class="nav-menu-item"><a href="about.html">about</a></span>
+    <span class="nav-menu-item"><a href="archives.html">archives</a></span>
+  </div>
+<section id="content" class="body">
+    <h1>About</h1>
+<p>Hi! I'm Robert Voyer. I'm a software engineer and data scientist in
+Seattle, WA. You can find me on
+<a href="https://twitter.com/robovoyo">Twitter</a> and here on
+<a href="https://www.linkedin.com/in/robertvoyer">LinkedIn</a>.</p>
+</section>
+  <!-- <hr> -->
+</div>
+<div class="container">
+  <div class="text-center center-block aw-bottom">
+    <p>&copy; Robert Voyer 2015</p>
+    <p>Powered by Pelican</p>
+  </div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
