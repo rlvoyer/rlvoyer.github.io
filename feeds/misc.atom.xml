@@ -69,7 +69,7 @@ result in our results list, and then we simply sum relevance scores at each
 position.&lt;/p&gt;
 &lt;div class="math"&gt;$$ CG_p = \sum_{i=1}^n rel_i $$&lt;/div&gt;
 &lt;p&gt; where &lt;/p&gt;
-&lt;div class="math"&gt;$$ rel_i = \{0, 1, 2, 3, 4\} $$&lt;/div&gt;
+&lt;div class="math"&gt;$$ rel_i = \{0, 1, 2, 3\} $$&lt;/div&gt;
 &lt;p&gt;What makes NDCG effective is its discount term. Discounted cumulative gain is a
 simple variation on the CG function defined above:&lt;/p&gt;
 &lt;div class="math"&gt;$$ DCG_p = rel_1 + \sum_{i=2}^n {rel_i \over D(i)} $$&lt;/div&gt;
