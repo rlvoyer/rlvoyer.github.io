@@ -14,6 +14,8 @@ PATH = 'content'
 
 STATIC_PATHS = ['images']
 
+PAGE_PATHS = ['pages']
+
 TIMEZONE = 'America/Vancouver'
 
 DEFAULT_LANG = u'en'
@@ -46,7 +48,7 @@ DEFAULT_PAGINATION = False
 #RELATIVE_URLS = True
 
 # Theme
-THEME = '{}/Code/pelican-themes/aboutwilson'.format(HOME)
+THEME = 'between2ranges'
 
 MD_EXTENSIONS = ['codehilite(css_class=highlight code)', 'extra']
 
@@ -55,4 +57,4 @@ PLUGIN_PATHS = ['{}/Code/pelican-plugins'.format(HOME)]
 PLUGINS = ['render_math']
 
 DESCRIPTION = 'A view on a data science and software engineering from a ' \
-              'technologist in Seattle'
+              'Seattle technologist'

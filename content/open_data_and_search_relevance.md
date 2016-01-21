@@ -2,13 +2,12 @@ Title: Open Data and Search Relevance
 Date: 2015-12-06
 Tags: software engineering, information retrieval, search, open data
 
-At [Socrata](http://www.socrata.com), we have built a platform that enables
-government agencies of all shapes and sizes to be more transparent, more
-accountable, and more data-driven than ever before. One of the interesting
-byproducts of the continued adoption of our platform is a constantly evolving
-network of open data publishers. When you have all of the world's open data
-within the same platform, interesting opportunities for cross-dataset insights
-and connectivity become possible.
+At [Socrata](http://www.socrata.com), we have built a data platform that enables
+government agencies to be more transparent than ever before. One of the
+interesting byproducts of the continued adoption of our platform is a constantly
+evolving network of open data publishers. When you have all of the world's open
+data within the same platform, interesting opportunities for cross-dataset
+insights and connectivity become possible.
 
 My team has been busy building out some of the software that will allow us to
 begin to surface this network to our users. Our first product offering along
@@ -34,20 +33,19 @@ high-level steps are as follows:
 
 Building an amazing search experience isn't easy. Google has set the standard;
 as users, we expect our search results instantaneously, and we expect them to be
-highly relevant. How does Google do it so well? Well, there is a lot of secret
-sauce in Google's ranking algorithm, to be sure. There has been
+highly relevant. How does Google do it so well? There has been
 [some recent discussion](http://www.bloomberg.com/news/articles/2015-10-26/google-turning-its-lucrative-web-search-over-to-ai-machines)
 about Google's use of a new AI system as an additional signal in their search
 result ranking model. It has been standard practice in the industry for some
-time to have a machine learning ranking model -- often an
+time to have a machine learned ranking model -- often an
 [artificial neural network](https://en.wikipedia.org/wiki/Artificial_neural_network)
 -- that incorporates a variety of signals. But rather than focus on the
 internals of an open dataset search engine, I want to talk about how to measure
 relevance.
 
 I have long been a fan of the following quote: "you cannot improve what you
-cannot measure". The first step in improving an open data search engine is being
-able to compute a metric that captures the quality of results.
+cannot measure". The first step in improving any search engine is being able to
+compute a metric that captures the quality of results.
 [Precision and recall](https://en.wikipedia.org/wiki/Precision_and_recall) are
 often thought of as the de facto metrics for Information Retrieval systems. But
 there are a couple of notable shortcomings of precision and recall (and the
@@ -72,11 +70,11 @@ for our expectation as users that the best results be at the top of the SERP
 (and that results further down the list contribute less to our perception of
 quality).
 
-So how do we compute NDCG? Well, let's break it down. Cumulative gain is a
-measure we apply to an individual query based on the results in our results list
-(usually capped at position 5 or 10). To compute it, we must assign a relevance
-score to each result in our results list, and then we simply sum relevance
-scores at each position.
+So how do we compute NDCG? Cumulative gain is a measure we apply to an
+individual query based on the results in our results list (usually capped at
+position 5 or 10). To compute it, we must assign a relevance score to each
+result in our results list, and then we simply sum relevance scores at each
+position.
 
 $$ CG_p = \sum_{i=1}^n rel_i $$ where $$ rel_i = \{0, 1, 2, 3, 4\} $$
 
@@ -110,7 +108,7 @@ pair over time as we compare more and more variants of our system. When we go to
 normalize our DCG score, we take as ideals the best possible ordering of the
 best results from the history of all judged query-result pairs.
 
-Let's consider an example. We have a query "kcpd crime data 2015" and the top 5
+Let's consider an example. We have a query "crime incidents" and the top 5
 results are judged to be "perfect", "irrelevant", "relevant", "loosely
 relevant", and "loosely relevant" respectively (represented on our numeric scale
 as 3, 0, 2, 1, 1). A corresponding ideal ordering would be 3, 2, 1, 1, 0. And we
@@ -149,12 +147,12 @@ crowdsourcing services like
 [CrowdFlower](http://www.crowdflower.com/) with dynamic workforces consisting of
 untrained workers, which is typically much more cost effective than training and
 managing your own team of annotators. (I was happy to discover local
-new-kids-on-the-block [ZCrowd](https://zcrowd.com/) entering the fray with a focus
-on dynamic skilled workforces.) One key observation here is that the level of
-training required is very much task-dependent. For Socrata, the task of
-assigning relevance judgments as we have framed it, while somewhat subjective
-and occasionally nuanced, is relatively straightforward, and thus, a workforce
-of untrained workers is sufficient (for now). We track the quality of the
+new-kids-on-the-block [ZCrowd](https://zcrowd.com/) who are focusing on dynamic
+skilled workforces.) One key observation here is that the level of training
+required is very much task-dependent. For Socrata, the task of assigning
+relevance judgments as we have framed it, while somewhat subjective and
+occasionally nuanced, is relatively straightforward, and thus, a workforce of
+untrained workers is sufficient (for now). We track the quality of the
 annotations that we collect by comparing crowdsourced judgments on a sample of
 data to corresponding judgments assigned by in-house experts.
 
@@ -164,16 +162,16 @@ single result (pointwise), a pair of results (pairwise), or a list of results
 (listwise)? The next dimension to think about is the type of judgment. Should
 you collect binary relevance labels, scalar relevance judgments, or should you
 simply ask the assessor to provide an ordering between results in a list? There
-are pros and cons to each of these approaches, which I've enumerated in the table
-below. Ultimately, we have adoped the pointwise approach, with absolute, scalar
-judgments, which has a few advantages. The first is its simplicity. As a simpler
-task, it can be completed more quickly and more reliably by annotators. But
-also, it's the most cost effective approach because it requires the fewest
-judgments. A judgment made about a query-result pair in isolation is absolute
-and reusable; once a particular QRP has been judged, it never has to be judged
-again. Given the task's inherent subjectivity, we opted for scalar judgments
-(rather than binary judgments) since they allow us to to capture as much
-information as possible at a reasonable cost.
+are pros and cons to each of these approaches, which I've enumerated in the
+table below. Ultimately, we have adopted the pointwise approach, with absolute,
+scalar judgments, which has a few advantages. The first is its simplicity. As a
+simpler task, it can be completed more quickly and more reliably by
+annotators. But also, it's the most cost effective approach because it requires
+the fewest judgments. A judgment made about a query-result pair in isolation is
+absolute and reusable; once a particular QRP has been judged, it never has to be
+judged again. Given the task's inherent subjectivity, we opted for scalar
+judgments (rather than binary judgments) since they allow us to to capture as
+much information as possible at a reasonable cost.
 
 <br/>
 <table border="1">
@@ -214,7 +212,7 @@ information as possible at a reasonable cost.
 </td>
 <td>
 <ul>
-<li>requires n^2 (worst-case) judgments [[*](#transitivity)]</li>
+<li>requires n<sup>2</sup> (worst-case) judgments [[*](#transitivity)]</li>
 </ul>
 </td>
 </tr>
@@ -244,13 +242,13 @@ information as possible at a reasonable cost.
 <br/>
 
 [<a name="transitivity">*</a>] [Carterette et al](http://research.microsoft.com/en-us/um/people/pauben/papers/HereOrThere-ECIR-2008.pdf)
-set out to show that pairwise judgments are the simplest for assesors. They show
+set out to show that pairwise judgments are the simplest for assessors. They show
 that relevance judgments typically obey transitivity, which means that the full
-set of n^2 pairwise judgments is not actually required. For our part, we have
-trouble justifying the complexity involved in building such a system given the
-marginal gain in task simplicity.
+set of n<sup>2</sup> pairwise judgments is not actually required. For our part,
+we have trouble justifying the complexity involved in building such a system
+given the marginal gain in task simplicity.
 
-A typical task looks as follows:
+Our typical task looks as follows:
 
 ![Task Screenshot]({attach}images/unit.pedestrian_counts.png)
 
@@ -272,21 +270,22 @@ for its instructional value. Additionally, including these high-variance QRPs as
 test data helps us to better quantify the quality of work that we're getting
 from each annotator.
 
-At this point, we have collected judgments for about 5800 query-result
+At this point, we have collected judgments for about 6000 query-result
 pairs. This is just a start, but it's enough for us to start doing some
 interesting things. Most importantly, it has allowed us to directly compare our
 catalog search systems -- old vs. new -- in terms of relevance. And the results
 are encouraging; in addition to the obvious increase in performance, and the
 improvements to the UI, the new system produces more relevant results than the
 old. We have created [a Python package](http://www.github.com/socrata/arcs) to
-support this process that is publically available on Github. In the meantime, we
-will continue using the data we are collecting with this new system to measure
-our progress as we iterate. And of course, feedback is appreciated.
+support this process that is publicly available on Github. Any feedback is
+much appreciated.
 
-In future posts, I will write in more detail about setting up the
-instrumentation required to compute an online metric such as
-[Click-Through Rate](https://en.wikipedia.org/wiki/Click-through_rate) and using
-click data to train a machine learned ranking model.
+Crowdsourced relevance judgments only tell part of the story; they are a proxy
+for how real users perceive the quality of our search results. In future posts,
+I will write in more detail about collecting usage data and computing online
+metrics such as
+[Click-Through Rate](https://en.wikipedia.org/wiki/Click-through_rate), and
+subsequently using click data to train a machine learned ranking model.
 
 ## References
 
