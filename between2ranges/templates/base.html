@@ -25,7 +25,9 @@
   </div>
   <div class="nav-menu">
     {% for menuitem, url in MENUITEMS %}
-    <span class="nav-menu-item"><a href="{{ url }}">{{ menuitem }}</a></span>
+    <span class="nav-menu-item">
+      <a href="{{ url }}">{{ menuitem }}</a>
+    </span>
     {% endfor %}
   </div>
   {% block content %}{% endblock %}
