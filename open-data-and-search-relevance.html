@@ -2,53 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Open Data and Search Relevance — [ ) Between Two Ranges ( ]</title>
+  <title>Open Data and Search Relevance — [ robert voyer ]</title>
   <meta name="description" content="Title: Open Data and Search Relevance; Date: 2015-12-06; Author: Robert Voyer">
   <meta name="author" content="Robert Voyer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-  <!--[if lt IE 9]>
-      <script src="http://rlvoyer.github.io/theme/html5.js"></script>
-      <![endif]-->  
-  <!--<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">-->
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="http://rlvoyer.github.io/theme/css/simple.css" rel="stylesheet">
-  <link href="http://rlvoyer.github.io/theme/css/pygments.css" rel="stylesheet">
+  <link href="/theme/css/simple.css" rel="stylesheet">
+  <link href="/theme/css/pygments.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
   <div class="page-header">
-    <h1><a href="http://rlvoyer.github.io/">[ ) Between Two Ranges ( ]</a>
+    <h1><a href="/">[ robert voyer ]</a>
       <br>  </div>
   <div class="nav-menu">
     <span class="nav-menu-item">
-      <a href="about.html">about</a>
-    </span>
-    <span class="nav-menu-item">
-      <a href="archives.html">archives</a>
+      <a href="archives.html">blog</a>
     </span>
   </div>
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
   <div class="article-header">
     <h1 itemprop="name headline" class="article-title">Open Data and Search Relevance</h1>
     <time datetime="2015-12-06 00:00:00-08:00" itemprop="datePublished">December 06, 2015</time>
-  </div>
- 
-  <div>
-    Tags:
-    <span itemprop="keywords">
-      <a href="http://rlvoyer.github.io/tag/software-engineering.html" rel="tag">software engineering</a>
-    </span>
-    <span itemprop="keywords">
-      <a href="http://rlvoyer.github.io/tag/information-retrieval.html" rel="tag">information retrieval</a>
-    </span>
-    <span itemprop="keywords">
-      <a href="http://rlvoyer.github.io/tag/search.html" rel="tag">search</a>
-    </span>
-    <span itemprop="keywords">
-      <a href="http://rlvoyer.github.io/tag/open-data.html" rel="tag">open data</a>
-    </span>
   </div>
   <div itemprop="articleBody" class="article-body"><p>At <a href="http://www.socrata.com">Socrata</a>, we have built a data platform that enables
 government agencies to be more transparent than ever before. One of the
@@ -155,19 +129,18 @@ results are judged to be "perfect", "irrelevant", "relevant", "loosely
 relevant", and "loosely relevant" respectively (represented on our numeric scale
 as 3, 0, 2, 1, 1). A corresponding ideal ordering would be 3, 2, 1, 1, 0. And we
 could compute NDCG like so:</p>
-<div class="highlight code"><pre><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
 
-<span class="k">def</span> <span class="nf">dcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">):</span>  <span class="c"># the +2 in the discount term because of 0-based indexing</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">):</span>  <span class="c1"># the +2 in the discount term because of 0-based indexing</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">judgments</span><span class="p">)])</span>
 
-<span class="k">def</span> <span class="nf">ndcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">):</span>
-    <span class="n">ideal_dcg</span> <span class="o">=</span> <span class="n">dcg</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ndcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">):</span>
+    <span class="n">ideal_dcg</span> <span class="o">=</span> <span class="n">dcg</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">dcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">)</span> <span class="o">/</span> <span class="n">ideal_dcg</span><span class="p">)</span> <span class="k">if</span> <span class="n">ideal_dcg</span> <span class="k">else</span> <span class="mf">0.0</span>
 
-<span class="k">print</span> <span class="n">ndcg</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span> <span class="n">ndcg</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 <span class="mf">0.927779663887</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>In order to attach a metric to our search engine's performance, we need
 relevance judgments for each query-result pair. How do we collect these
@@ -212,7 +185,7 @@ absolute and reusable; once a particular QRP has been judged, it never has to be
 judged again. Given the task's inherent subjectivity, we opted for scalar
 judgments (rather than binary judgments) since they allow us to to capture as
 much information as possible at a reasonable cost.</p>
-<p><br/>
+<p><br/></p>
 <table border="1">
 <tr>
 <th colspan="2">Listwise</th>
@@ -246,12 +219,12 @@ much information as possible at a reasonable cost.</p>
 <td>
 <ul>
 <li>simple annotation task</li>
-<li>reusable judgments (assuming <a href="#transitivity">transitivity</a>)</li>
+<li>reusable judgments (assuming [transitivity](#transitivity))</li>
 </ul>
 </td>
 <td>
 <ul>
-<li>requires n<sup>2</sup> (worst-case) judgments [<a href="#transitivity">*</a>]</li>
+<li>requires n<sup>2</sup> (worst-case) judgments [[*](#transitivity)]</li>
 </ul>
 </td>
 </tr>
@@ -278,7 +251,7 @@ much information as possible at a reasonable cost.</p>
 </td>
 </tr>
 </table>
-<br/></p>
+<p><br/></p>
 <p>[<a name="transitivity">*</a>] <a href="http://research.microsoft.com/en-us/um/people/pauben/papers/HereOrThere-ECIR-2008.pdf">Carterette et al</a>
 set out to show that pairwise judgments are the simplest for assessors. They show
 that relevance judgments typically obey transitivity, which means that the full
@@ -286,7 +259,7 @@ set of n<sup>2</sup> pairwise judgments is not actually required. For our part,
 we have trouble justifying the complexity involved in building such a system
 given the marginal gain in task simplicity.</p>
 <p>Our typical task looks as follows:</p>
-<p><img alt="Task Screenshot" src="http://rlvoyer.github.io/images/unit.pedestrian_counts.png" /></p>
+<p><img alt="Task Screenshot" src="/images/unit.pedestrian_counts.png" /></p>
 <p>Depending on the platform (presently, we're using CrowdFlower), we can collect
 job output programmatically via API as JSON or from a GUI as a CSV. We persist
 query sets and judgments in a Postgres database with an eye towards
@@ -336,15 +309,16 @@ subsequently using click data to train a machine learned ranking model.</p>
     }
 
     var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
     mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
     mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
         "MathJax.Hub.Config({" +
         "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
         "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
         "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
         "    displayAlign: '"+ align +"'," +
@@ -358,6 +332,8 @@ subsequently using click data to train a machine learned ranking model.</p>
         "        preview: 'TeX'," +
         "    }, " +
         "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
         "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
         "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
         "    }, " +
@@ -378,47 +354,13 @@ subsequently using click data to train a machine learned ranking model.</p>
                 "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
             "});" +
         "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
 </script></div>
-  <hr>
-  <h2>Comments</h2>
-<div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = 'betweentworanges'; 
-    var disqus_title = 'Open Data and Search Relevance';
-
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
   <!-- <hr> -->
 </div>
-<div class="container">
-  <div class="text-center center-block aw-bottom">
-    <p>&copy; Robert Voyer 2015</p>
-    <p>Powered by Pelican</p>
-  </div>
-</div>
-<!-- JavaScript -->
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-jQuery(document).ready(function($) {
-	$("div.collapseheader").click(function () {
-		$header = $(this).children("span").first();
-		$codearea = $(this).children(".input_area");
-		$codearea.slideToggle(500, function () {
-			$header.text(function () {
-				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
-			});
-		});
-	});
-});
-</script>
 </body>
 </html>

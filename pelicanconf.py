@@ -52,3 +52,5 @@ PLUGINS = ['render_math']
 
 DESCRIPTION = 'A view on a data science and software engineering from a ' \
               'Seattle technologist'
+
+OUTPUT_PATH = '.'
