@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="{{ DEFAULT_LANG }}">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{{ SITENAME }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}Coding, scientific development, finance, data analysis, visualization, statistics, and machine learning{% endblock %}">
+  <meta name="author" content="{{ AUTHOR }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="{{ SITEURL }}/theme/css/simple.css" rel="stylesheet">
+  <link href="{{ SITEURL }}/theme/css/pygments.css" rel="stylesheet">
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <h1><a href="{{ SITEURL }}/">{{ SITENAME }}</a>
+      <br>{% if SITESUBTITLE %}<small>{{ SITESUBTITLE }}</small></h1>{% endif %}
+  </div>
+  <div class="nav-menu">
+    {% for menuitem, url in MENUITEMS %}
+    <span class="nav-menu-item">
+      <a href="{{ url }}">{{ menuitem }}</a>
+    </span>
+    {% endfor %}
+  </div>
+  {% block content %}{% endblock %}
+  <!-- <hr> -->
+</div>
+{% include "github.html" %}
+</body>
+</html>

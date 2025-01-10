@@ -1,0 +1,175 @@
+.container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.page-header {
+    padding-bottom: 9px;
+    margin: 40px 0 20px;
+    border-bottom: 1px solid #404040;
+}
+
+/* Responsive container widths */
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    border-top: 1px solid #404040;  /* Darker color to match your dark theme */
+}
+
+body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    color: #e0e0e0;                   /* Light text for dark background */
+    background-color: #1a1a1a;        /* Dark background */
+    font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 16px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    margin:0;
+}
+
+a {
+    background-color: transparent;
+    color: #f0dfaf;                   /* Zenburn's warm yellow */
+    text-decoration: none;
+}
+
+a:active, a:hover {
+    outline: 0;
+    text-decoration: underline;
+    color: #efef8f;                   /* Brighter yellow on hover */
+}
+
+strong {
+    font-weight: bold;
+    color: #ffffff;                   /* Brighter white for emphasis */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    line-height: 1.1;
+    color: #ffffff;                   /* Brighter white for headers */
+}
+
+h1 { font-size: 30px; }
+h2 { font-size: 21px; }
+h3 { font-size: 16px; }
+h4 { font-size: 14px; }
+h5 { font-size: 12px; }
+h6 { font-size: 11px; }
+
+ul, ol {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+blockquote {
+    margin: 0;
+    border-left: 4px solid #404040;   /* Darker border for blockquotes */
+    padding-left: 1em;
+    color: #b0b0b0;                   /* Slightly dimmed text for quotes */
+}
+
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+    opacity: 0.9;                     /* Slightly reduce image harshness */
+}
+
+/* hr { */
+/*     box-sizing: content-box; */
+/*     height: 0; */
+/*     margin: 15px 0; */
+/*     overflow: hidden; */
+/*     background: transparent; */
+/*     border: 0; */
+/*     border-bottom: 1px solid #404040; /\* Darker border for hr *\/ */
+/* } */
+
+hr:before {
+    display: table;
+    content: "";
+}
+
+hr:after {
+    display: table;
+    clear: both;
+    content: "";
+}
+
+kdb, pre {
+    overflow: auto;
+    background-color: #2d2d2d;        /* Slightly lighter than main background */
+    border-radius: 4px;
+    padding: 1em;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+th, td {
+    text-align: left;
+    padding: 5px;
+    border: 1px solid #404040;        /* Dark borders for table cells */
+}
+
+th {
+    background-color: #2d2d2d;        /* Darker background for headers */
+    color: #ffffff;                   /* Bright text for table headers */
+}
+
+.aw-bottom {
+    padding: 2em;
+    background-color: #2d2d2d;        /* Slightly lighter background for footer */
+}
+
+.article-body {
+    margin-top: 2em;
+    color: #e0e0e0;                   /* Light text color */
+}
+
+.article-header {
+    margin-bottom: 1em;
+}
+
+.nav-menu-item:before {
+    content: "[";
+    color: #808080;                   /* Subtle gray for brackets */
+}
+
+.nav-menu-item:after {
+    content: "]";
+    color: #808080;                   /* Subtle gray for brackets */
+}
+
+span[itemprop="keywords"]:before {
+    content: "[";
+    color: #808080;                   /* Subtle gray for brackets */
+}
+
+span[itemprop="keywords"]:after {
+    content: "]";
+    color: #808080;                   /* Subtle gray for brackets */
+}

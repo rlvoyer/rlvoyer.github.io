@@ -1,6 +1,7 @@
 Title: Open Data and Search Relevance
 Date: 2015-12-06
 Tags: software engineering, information retrieval, search, open data
+Summary: This article explains how Socrata measures and improves search result quality for their open data platform by using crowdsourced relevance judgments and the NDCG metric.
 
 At [Socrata](http://www.socrata.com), we have built a data platform that enables
 government agencies to be more transparent than ever before. One of the

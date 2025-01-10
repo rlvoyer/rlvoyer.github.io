@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Open Data and Search Relevance — [ robert voyer ]</title>
+  <meta name="description" content="Title: Open Data and Search Relevance; Date: 2015-12-06; Author: Robert Voyer">
+  <meta name="author" content="Robert Voyer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/theme/css/simple.css" rel="stylesheet">
+  <link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <h1><a href="/">[ robert voyer ]</a>
+      <br>  </div>
+  <div class="nav-menu">
+    <span class="nav-menu-item">
+      <a href="archives.html">blog</a>
+    </span>
+  </div>
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="article-header">
+    <h1 itemprop="name headline" class="article-title">Open Data and Search Relevance</h1>
+    <time datetime="2015-12-06 00:00:00-08:00" itemprop="datePublished">December 06, 2015</time>
+  </div>
+  <div itemprop="articleBody" class="article-body"><p>At <a href="http://www.socrata.com">Socrata</a>, we have built a data platform that enables
+government agencies to be more transparent than ever before. One of the
+interesting byproducts of the continued adoption of our platform is a constantly
+evolving network of open data publishers. When you have all of the world's open
+data within the same platform, interesting opportunities for cross-dataset
+insights and connectivity become possible.</p>
+<p>My team has been busy building out some of the software that will allow us to
+begin to surface this network to our users. Our first product offering along
+these lines is the search engine powering the
+<a href="http://www.opendatanetwork.com">Open Data Network</a>. As it happens, it is also
+the same system that backs our version 2 catalog search interface, which our
+customers interact with regularly when they visit their Socrata site's browse
+endpoint (eg.  <a href="http://data.seattle.gov/browse">data.seattle.gov/browse</a>) to
+update, analyze, and visualize their data.</p>
+<p>We have spent some time recently trying to improve this core piece of technology
+both in terms of performance as well as accuracy and relevance. In this blog
+post, I will discuss how we use crowdsourcing to collect relevance judgments to
+measure the quality of the search results in our catalog search engine. The
+high-level steps are as follows:</p>
+<ol>
+<li>sample a set of queries from query logs to serve as
+   <a href="https://gist.github.com/rlvoyer/c5dc896a39ab69288024">a measurement set</a></li>
+<li>given a particular version of the search engine, collect results for each
+   query in the measurement set</li>
+<li>assign a relevance judgment to each (query, result) pair</li>
+<li>compute relevance metrics</li>
+</ol>
+<p>Building an amazing search experience isn't easy. Google has set the standard;
+as users, we expect our search results instantaneously, and we expect them to be
+highly relevant. How does Google do it so well? There has been
+<a href="http://www.bloomberg.com/news/articles/2015-10-26/google-turning-its-lucrative-web-search-over-to-ai-machines">some recent discussion</a>
+about Google's use of a new AI system as an additional signal in their search
+result ranking model. It has been standard practice in the industry for some
+time to have a machine learned ranking model -- often an
+<a href="https://en.wikipedia.org/wiki/Artificial_neural_network">artificial neural network</a>
+-- that incorporates a variety of signals. But rather than focus on the
+internals of an open dataset search engine, I want to talk about how to measure
+relevance.</p>
+<p>I have long been a fan of the following quote: "you cannot improve what you
+cannot measure". The first step in improving any search engine is being able to
+compute a metric that captures the quality of results.
+<a href="https://en.wikipedia.org/wiki/Precision_and_recall">Precision and recall</a> are
+often thought of as the de facto metrics for Information Retrieval systems. But
+there are a couple of notable shortcomings of precision and recall (and the
+closely related
+<a href="https://en.wikipedia.org/wiki/F1_score">F-measure</a>, which combines precision
+and recall into a single measure). Firstly, recall is generally difficult to
+measure within the context of search engine because it requires knowing and
+judging the relevance of all possible results for a particular query. In some
+cases, the cardinality of that result set could be on the order of hundreds of
+thousands. Additionally, neither precision, recall, nor F-measure take into
+account the ordering of results.</p>
+<p>As users, we expect the most relevant results to be at the top of the search
+engine results page (SERP). We rarely even look beyond the first page. According
+to <a href="https://moz.com/blog/google-organic-click-through-rates-in-2014">this study</a>
+by the folks at <a href="https://moz.com/">Moz</a>, about 71% of Google searches result in
+a click on the first page and the first 5 results account for 68% of all
+clicks. In Socrata’s catalog search engine, only 6% of users click past the
+first page. Normalized discounted cumulative gain (NDCG) has seen widespread
+adoption as a core metric in the search industry precisely because it accounts
+for our expectation as users that the best results be at the top of the SERP
+(and that results further down the list contribute less to our perception of
+quality).</p>
+<p>So how do we compute NDCG? Cumulative gain is a measure we apply to an
+individual query based on the results in our results list (usually capped at
+position 5 or 10). To compute it, we must assign a relevance score to each
+result in our results list, and then we simply sum relevance scores at each
+position.</p>
+<div class="math">$$ CG_p = \sum_{i=1}^n rel_i $$</div>
+<p> where </p>
+<div class="math">$$ rel_i = \{0, 1, 2, 3\} $$</div>
+<p>What makes NDCG effective is its discount term. Discounted cumulative gain is a
+simple variation on the CG function defined above:</p>
+<div class="math">$$ DCG_p = rel_1 + \sum_{i=2}^n {rel_i \over D(i)} $$</div>
+<p> where </p>
+<div class="math">$$ D(i) = log_2(i + 1) $$</div>
+<p>The idea here is that we have a discount function in the denominator that is a
+monotonically increasing function of position. Thus, the denominator increases
+as we go further down the results list, meaning that each result contributes
+less to the overall sum of scores. (Strictly speaking, we use the second
+variant described on the
+<a href="https://en.wikipedia.org/wiki/Discounted_cumulative_gain">Wikipedia page for NDCG</a>
+.)</p>
+<p>Finally, the score is "normalized" (the "N" in "NDCG"). DCG is a measure that we
+compute for each query, but not all queries are created equal. For some queries,
+a search engine may have 10 or more highly relevant results. For other queries,
+there may be far fewer or none at all. In order to be able to compare across
+queries (or average across them to capture the search engine's performance across
+an entire query set), we need them all to be on the same scale. To do this, we
+normalize the DCG of each query by the DCG of the best possible ordering of the
+same results.</p>
+<div class="math">$$ NDCG_p = {DCG_p \over IDCG_p} $$</div>
+<p> where </p>
+<div class="math">$$ IDCG_p $$</div>
+<p> is the DCG applied to the ideal
+set of results for a given query.</p>
+<p>In practice, we collect more and more judgments for a particular query-result
+pair over time as we compare more and more variants of our system. When we go to
+normalize our DCG score, we take as ideals the best possible ordering of the
+best results from the history of all judged query-result pairs.</p>
+<p>Let's consider an example. We have a query "crime incidents" and the top 5
+results are judged to be "perfect", "irrelevant", "relevant", "loosely
+relevant", and "loosely relevant" respectively (represented on our numeric scale
+as 3, 0, 2, 1, 1). A corresponding ideal ordering would be 3, 2, 1, 1, 0. And we
+could compute NDCG like so:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">dcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">):</span>  <span class="c1"># the +2 in the discount term because of 0-based indexing</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">judgments</span><span class="p">)])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ndcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">):</span>
+    <span class="n">ideal_dcg</span> <span class="o">=</span> <span class="n">dcg</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">dcg</span><span class="p">(</span><span class="n">judgments</span><span class="p">)</span> <span class="o">/</span> <span class="n">ideal_dcg</span><span class="p">)</span> <span class="k">if</span> <span class="n">ideal_dcg</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+<span class="nb">print</span> <span class="n">ndcg</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="mf">0.927779663887</span>
+</code></pre></div>
+
+<p>In order to attach a metric to our search engine's performance, we need
+relevance judgments for each query-result pair. How do we collect these
+measurements? Well, the most obvious way is to hire an army of data annotators
+and to have them assign a judgment to each query-result pair. As it turns out,
+this is one of the tasks that workers in
+<a href="http://searchengineland.com/bing-search-quality-rating-guidelines-130592">Microsoft's Human Relevance System</a>
+and
+<a href="http://marketingland.com/an-inside-look-at-what-googles-search-quality-raters-do-3969">Google's Quality Rater program</a>
+are asked to do. </p>
+<p>In the case of Microsoft and Google, the people hired to make these relevance
+judgments are trained. Certainly, part of the motivation for this is that it
+allows Google and Microsoft to craft a much more nuanced task. This allows them
+to incorporate more than just search term relevance into their judgments
+(freshness, authority, etc.). In contrast, there are a few companies that offer
+crowdsourcing services like
+<a href="https://www.mturk.com/mturk/welcome">Amazon Mechanical Turk</a> and
+<a href="http://www.crowdflower.com/">CrowdFlower</a> with dynamic workforces consisting of
+untrained workers, which is typically much more cost effective than training and
+managing your own team of annotators. (I was happy to discover local
+new-kids-on-the-block <a href="https://zcrowd.com/">ZCrowd</a> who are focusing on dynamic
+skilled workforces.) One key observation here is that the level of training
+required is very much task-dependent. For Socrata, the task of assigning
+relevance judgments as we have framed it, while somewhat subjective and
+occasionally nuanced, is relatively straightforward, and thus, a workforce of
+untrained workers is sufficient (for now). We track the quality of the
+annotations that we collect by comparing crowdsourced judgments on a sample of
+data to corresponding judgments assigned by in-house experts.</p>
+<p>There are a few different dimensions to consider when designing our relevance
+task. The first is the arity of the task. Do you present the annotator with a
+single result (pointwise), a pair of results (pairwise), or a list of results
+(listwise)? The next dimension to think about is the type of judgment. Should
+you collect binary relevance labels, scalar relevance judgments, or should you
+simply ask the assessor to provide an ordering between results in a list? There
+are pros and cons to each of these approaches, which I've enumerated in the
+table below. Ultimately, we have adopted the pointwise approach, with absolute,
+scalar judgments, which has a few advantages. The first is its simplicity. As a
+simpler task, it can be completed more quickly and more reliably by
+annotators. But also, it's the most cost effective approach because it requires
+the fewest judgments. A judgment made about a query-result pair in isolation is
+absolute and reusable; once a particular QRP has been judged, it never has to be
+judged again. Given the task's inherent subjectivity, we opted for scalar
+judgments (rather than binary judgments) since they allow us to to capture as
+much information as possible at a reasonable cost.</p>
+<p><br/></p>
+<table border="1">
+<tr>
+<th colspan="2">Listwise</th>
+</tr>
+<tr>
+<td>Pros</td>
+<td>Cons</td>
+</tr>
+<tr>
+<td>
+<ul>
+<li>directly reflects the underlying process being modeled</li>
+<li>includes context (of surrounding results)</li>
+</ul>
+</td>
+<td>
+<ul>
+<li>complex annotation task</li>
+<li>judgments are not reusable</li>
+</ul>
+</td>
+</tr>
+<tr>
+<th colspan="2">Pairwise</th>
+</tr>
+<tr>
+<td>Pros</td>
+<td>Cons</td>
+</tr>
+<tr>
+<td>
+<ul>
+<li>simple annotation task</li>
+<li>reusable judgments (assuming [transitivity](#transitivity))</li>
+</ul>
+</td>
+<td>
+<ul>
+<li>requires n<sup>2</sup> (worst-case) judgments [[*](#transitivity)]</li>
+</ul>
+</td>
+</tr>
+<tr>
+<th colspan="2">Pointwise</th>
+</tr>
+<tr>
+<td>Pros</td>
+<td>Cons</td>
+</tr>
+<tr>
+<td>
+<ul>
+<li>simple annotation task</li>
+<li>reusable "absolute" judgments</li>
+<li>cost effective given simplicity and reusability</li>
+<li>simple implementation</li>
+</ul>
+</td>
+<td>
+<ul>
+<li>many simplifying assumptions</li>
+</ul>
+</td>
+</tr>
+</table>
+<p><br/></p>
+<p>[<a name="transitivity">*</a>] <a href="http://research.microsoft.com/en-us/um/people/pauben/papers/HereOrThere-ECIR-2008.pdf">Carterette et al</a>
+set out to show that pairwise judgments are the simplest for assessors. They show
+that relevance judgments typically obey transitivity, which means that the full
+set of n<sup>2</sup> pairwise judgments is not actually required. For our part,
+we have trouble justifying the complexity involved in building such a system
+given the marginal gain in task simplicity.</p>
+<p>Our typical task looks as follows:</p>
+<p><img alt="Task Screenshot" src="/images/unit.pedestrian_counts.png" /></p>
+<p>Depending on the platform (presently, we're using CrowdFlower), we can collect
+job output programmatically via API as JSON or from a GUI as a CSV. We persist
+query sets and judgments in a Postgres database with an eye towards
+reproducibility, while also ensuring that we never unintentionally re-submit
+previously judged pairs.</p>
+<p>One neat feature of CrowdFlower is its quality control mechanism. We, the task
+designers, are prompted to enter "gold" data, which is used to a) avoid
+collecting bad data from scammers, and b) help instruct workers, and c) weight
+the judgments provided by workers according to their trustworthiness. Getting
+multiple judgments for each QRP allows us to average out the results, thus
+getting a more reliable signal than had each QRP been judged only once. Looking
+at the variance of the judgments provided by our workers, we can identify
+particularly difficult and nuanced pairs, which may serve as valuable test data
+for its instructional value. Additionally, including these high-variance QRPs as
+test data helps us to better quantify the quality of work that we're getting
+from each annotator.</p>
+<p>At this point, we have collected judgments for about 6000 query-result
+pairs. This is just a start, but it's enough for us to start doing some
+interesting things. Most importantly, it has allowed us to directly compare our
+catalog search systems -- old vs. new -- in terms of relevance. And the results
+are encouraging; in addition to the obvious increase in performance, and the
+improvements to the UI, the new system produces more relevant results than the
+old. We have created <a href="http://www.github.com/socrata/arcs">a Python package</a> to
+support this process that is publicly available on Github. Any feedback is
+much appreciated.</p>
+<p>Crowdsourced relevance judgments only tell part of the story; they are a proxy
+for how real users perceive the quality of our search results. In future posts,
+I will write in more detail about collecting usage data and computing online
+metrics such as
+<a href="https://en.wikipedia.org/wiki/Click-through_rate">Click-Through Rate</a>, and
+subsequently using click data to train a machine learned ranking model.</p>
+<h2>References</h2>
+<p><a href="https://moz.com/blog/google-organic-click-through-rates-in-2014">"Google Organic Click-through Rates in 2014", Philip Petrescu</a></p>
+<p><a href="http://hughewilliams.com/2014/10/11/measuring-search-relevance/">"Measuring Search Relevance", Hugh Williams</a></p>
+<p><a href="http://searchengineland.com/bing-search-quality-rating-guidelines-130592">"Yes, Bing Has Human Search Quality Raters &amp; Here’s How They Judge Web Pages", Matt McGee</a></p>
+<p><a href="http://research.microsoft.com/en-us/people/tyliu/listnet.pdf">Learning to rank: from pairwise approach to listwise approach, Cao, Qin, Liu et al.</a></p>
+<p><a href="http://research.microsoft.com/en-us/um/people/pauben/papers/HereOrThere-ECIR-2008.pdf">Here or There: Preference Judgments for Relevance</a></p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+</div>
+  <!-- <hr> -->
+</div>
+</body>
+</html>
